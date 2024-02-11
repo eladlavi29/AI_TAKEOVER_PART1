@@ -7,7 +7,7 @@ import heapdict
 
 class BFSAgent():
     def __init__(self) -> None:
-        raise NotImplementedError
+        pass
 
     def search(self, env: DragonBallEnv) -> Tuple[List[int], float, int]:
         raise NotImplementedError
