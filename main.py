@@ -64,12 +64,18 @@ env.reset()
 
 #print_solution(actions, env)
 
-WA_agent = WeightedAStarAgent()
+#WA_agent = WeightedAStarAgent()
 
-# actions, total_cost, expanded = WA_agent.search(env, h_weight=0.5)
-# print(f"Total_cost: {total_cost}")
-# print(f"Expanded: {expanded}")
-# print(f"Actions: {actions}")
+#actions, total_cost, expanded = WA_agent.search(env, h_weight=0.5)
+#print(f"Total_cost: {total_cost}")
+#print(f"Expanded: {expanded}")
+#print(f"Actions: {actions}")
+
+AStarEpsilon_agent = AStarEpsilonAgent()
+actions, total_cost, expanded = AStarEpsilon_agent.search(env, epsilon=100)
+print(f"Total_cost: {total_cost}")
+print(f"Expanded: {expanded}")
+print(f"Actions: {actions}")
 
 #print_solution(actions, env)
 
