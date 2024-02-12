@@ -54,13 +54,23 @@ env = DragonBallEnv(MAPS["8x8"])
 
 env.reset()
 
-BFS_agent = BFSAgent()
-actions, total_cost, expanded = BFS_agent.search(env)
-print(f"Total_cost: {total_cost}")
-print(f"Expanded: {expanded}")
-print(f"Actions: {actions}")
+# BFS_agent = BFSAgent()
+# actions, total_cost, expanded = BFS_agent.search(env)
+# print(f"Total_cost: {total_cost}")
+# print(f"Expanded: {expanded}")
+# print(f"Actions: {actions}")
+#
+# assert total_cost == 119.0, "Error in total cost returned"
 
-assert total_cost == 119.0, "Error in total cost returned"
+#print_solution(actions, env)
 
-print_solution(actions, env)
+WA_agent = WeightedAStarAgent()
+
+# actions, total_cost, expanded = WA_agent.search(env, h_weight=0.5)
+# print(f"Total_cost: {total_cost}")
+# print(f"Expanded: {expanded}")
+# print(f"Actions: {actions}")
+
+#print_solution(actions, env)
+
 

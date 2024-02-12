@@ -24,10 +24,13 @@ class BFSAgent():
         pass
 
     def search(self, env: DragonBallEnv) -> Tuple[List[int], float, int]:
-        close = []
         curr = env.get_state()
 
+        if env.is_final_state(curr):
+            return [], 0, 0
+
         open = [curr]
+        close = []
         fathers = {curr: (None, -1)}
         costs = {curr: 0}
 
@@ -54,17 +57,52 @@ class BFSAgent():
                         open.append(state)
                         fathers[state] = (curr, action)
                         costs[state] = costs[curr] + cost
-                        print(state)
 
         return [], -1, -1
 
 
 class WeightedAStarAgent():
+
+    def h_msap(self, env: DragonBallEnv, s):
+        def h_manheten(state1, state2):
+            (x1, y1) = env.to_row_col(state1)
+            (x2, y2) = env.to_row_col(state2)
+
+            return np.abs(x1 - x2) + np.abs(y1 - y2)
+
+        min = np.inf
+
+        # min = h_manheten(s, env.d1)
+        #
+        # if(h_manheten(s, env.d2) < min):
+        #     min = h_manheten(s, env.d2)
+
+        for state in range (env.nrow * env.ncol):
+            if env.is_final_state((state, True, True)):
+                if (h_manheten(s, (state, True, True)) < min):
+                    min = h_manheten(s, (state, True, True))
+
+        return min
+
+    def f(self, state, g, w):
+        return (1 - w) * g + w * self.h_msap(state)
+
     def __init__(self) -> None:
-        raise NotImplementedError
+        pass
 
     def search(self, env: DragonBallEnv, h_weight) -> Tuple[List[int], float, int]:
-        raise NotImplementedError
+        curr = env.get_state()
+
+        if env.is_final_state(curr):
+            return [], 0, 0
+
+        open = [curr]
+        close = []
+        fathers = {curr: (None, -1)}
+        gvalue = {curr: 0}
+
+        fvalue = heapdict.heapdict()
+        fvalue = self.f(curr, gvalue[curr])
 
 
 class AStarEpsilonAgent():
