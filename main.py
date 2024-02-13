@@ -70,13 +70,13 @@ env.reset()
 #print(f"Total_cost: {total_cost}")
 #print(f"Expanded: {expanded}")
 #print(f"Actions: {actions}")
-
+#
 AStarEpsilon_agent = AStarEpsilonAgent()
 actions, total_cost, expanded = AStarEpsilon_agent.search(env, epsilon=100)
 print(f"Total_cost: {total_cost}")
 print(f"Expanded: {expanded}")
 print(f"Actions: {actions}")
 
-#print_solution(actions, env)
+print_solution(actions, env)
 
 

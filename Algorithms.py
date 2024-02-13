@@ -174,15 +174,25 @@ class AStarEpsilonAgent():
         return (1 - w) * g + w * self.h_msap(env, state)
 
 
-    def next(self, env, open, epsilon):
+    def next(self, env, open, epsilon, gvalues):
         min_f = open.peekitem()[1]
 
         focal = [state for state in open.keys() if open[state] <= min_f * (1 + epsilon)]
 
+        """
         min_h = np.inf
         next_state = None
         for state in focal:
             if self.h_msap(env, state) < min_h:
+                min_h = self.h_msap(env, state)
+                next_state = state
+        """
+
+        min_g = np.inf
+        next_state = None
+        for state in focal:
+            if gvalues[state] < min_g:
+                min_g = gvalues[state]
                 next_state = state
 
         return next_state
@@ -204,7 +214,7 @@ class AStarEpsilonAgent():
         open[curr] = self.f(env, curr, gvalues[curr], h_weight)
 
         while not len(open) == 0:
-            curr = self.next(env, open, epsilon)
+            curr = self.next(env, open, epsilon, gvalues)
             open.pop(curr)
             close.append(curr)
 
