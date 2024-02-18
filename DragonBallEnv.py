@@ -46,6 +46,8 @@ class DragonBallEnv(Env):
         self.goals = []
         self.collected_dragon_balls = [False, False]  # to keep track of collected Dragon Balls
 
+        self.s = (0, False, False)
+
         nA = 4
         nL_cost = {b"F": 10.0, b"H": np.inf, b"T": 3.0, b"A": 2.0, b"L": 1.0, b"S": 1.0, b"G": 1.0, b"D": 1}
         nS = nrow * ncol

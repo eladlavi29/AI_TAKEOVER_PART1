@@ -39,8 +39,10 @@ class BFSAgent():
             open = open[1:]
             close.append(curr)
 
-            for action, ((position, _, _), cost, _) in env.succ(curr).items():
-                if cost != np.inf:
+            for action, succ in env.succ(curr).items():
+                if succ[0] is not None:
+                    ((position, _, _), cost, _) = succ
+
                     state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
 
                     if (state not in close) and (state not in open):
@@ -179,21 +181,22 @@ class AStarEpsilonAgent():
 
         focal = [state for state in open.keys() if open[state] <= min_f * (1 + epsilon)]
 
-        """
         min_h = np.inf
         next_state = None
         for state in focal:
             if self.h_msap(env, state) < min_h:
                 min_h = self.h_msap(env, state)
                 next_state = state
-        """
 
+        """
         min_g = np.inf
         next_state = None
         for state in focal:
             if gvalues[state] < min_g:
                 min_g = gvalues[state]
                 next_state = state
+                
+        """
 
         return next_state
 
