@@ -119,8 +119,9 @@ class WeightedAStarAgent():
 
                 return actions, gvalues[curr], len(close)
 
-            for action, ((position, _, _), cost, _) in env.succ(curr).items():
-                if cost != np.inf:
+            for action, succ in env.succ(curr).items():
+                if succ[0] is not None:
+                    ((position, _, _), cost, _) = succ
                     state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
 
                     new_g = gvalues[curr] + cost
@@ -181,6 +182,7 @@ class AStarEpsilonAgent():
 
         focal = [state for state in open.keys() if open[state] <= min_f * (1 + epsilon)]
 
+        """
         min_h = np.inf
         next_state = None
         for state in focal:
@@ -195,8 +197,6 @@ class AStarEpsilonAgent():
             if gvalues[state] < min_g:
                 min_g = gvalues[state]
                 next_state = state
-                
-        """
 
         return next_state
 
@@ -231,8 +231,9 @@ class AStarEpsilonAgent():
 
                 return actions, gvalues[curr], len(close)
 
-            for action, ((position, _, _), cost, _) in env.succ(curr).items():
-                if cost != np.inf:
+            for action, succ in env.succ(curr).items():
+                if succ[0] is not None:
+                    ((position, _, _), cost, _) = succ
                     state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
 
                     new_g = gvalues[curr] + cost
