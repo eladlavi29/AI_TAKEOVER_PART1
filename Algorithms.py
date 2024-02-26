@@ -33,32 +33,35 @@ class BFSAgent():
         close = []
         fathers = {curr: (None, -1)}
         costs = {curr: 0}
+        terminated = {curr: False}
 
         while not len(open) == 0:
             curr = open[0]
             open = open[1:]
             close.append(curr)
 
-            for action, succ in env.succ(curr).items():
-                if succ[0] is not None:
-                    ((position, _, _), cost, _) = succ
+            if(terminated[curr]):
+                continue
 
-                    state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
+            for action, ((position, _, _), cost, ter) in env.succ(curr).items():
+                state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
 
-                    if (state not in close) and (state not in open):
-                        if env.is_final_state(state):
-                            #Calculate track to the solution
-                            actions = [action]
-                            iterator = curr
-                            while fathers[iterator][1] != -1:
-                                actions = [fathers[iterator][1]] + actions
-                                iterator = fathers[iterator][0]
+                if (state not in close) and (state not in open):
+                    if env.is_final_state(state):
+                        #Calculate track to the solution
+                        actions = [action]
+                        iterator = curr
+                        while fathers[iterator][1] != -1:
+                            actions = [fathers[iterator][1]] + actions
+                            iterator = fathers[iterator][0]
 
-                            return actions, costs[curr] + cost, len(close)
+                        return actions, costs[curr] + cost, len(close)
 
-                        open.append(state)
-                        fathers[state] = (curr, action)
-                        costs[state] = costs[curr] + cost
+                    open.append(state)
+                    terminated[state] = ter
+                    fathers[state] = (curr, action)
+                    costs[state] = costs[curr] + cost
+
 
         return [], -1, -1
 
@@ -72,9 +75,11 @@ class WeightedAStarAgent():
 
             return np.abs(x1 - x2) + np.abs(y1 - y2)
 
-        min = h_manheten(s, env.d1)
+        min = np.inf
+        if (h_manheten(s, env.d1) < min and not s[1]):
+            min = h_manheten(s, env.d1)
 
-        if(h_manheten(s, env.d2) < min):
+        if (h_manheten(s, env.d2) < min and not s[2]):
             min = h_manheten(s, env.d2)
 
         for state in range (env.nrow * env.ncol):
@@ -100,14 +105,14 @@ class WeightedAStarAgent():
         close = []
         fathers = {curr: (None, -1)}
         gvalues = {curr: 0}
+        terminated = {curr: False}
 
         fvalues = {}
         fvalues[curr] = self.f(env, curr, gvalues[curr], h_weight)
-        open[curr] = self.f(env, curr, gvalues[curr], h_weight)
+        open[curr] = (self.f(env, curr, gvalues[curr], h_weight), curr[0])
 
         while not len(open) == 0:
             curr = open.popitem()[0]
-            close.append(curr)
 
             if env.is_final_state(curr):
                 # Calculate track to the solution
@@ -119,34 +124,40 @@ class WeightedAStarAgent():
 
                 return actions, gvalues[curr], len(close)
 
-            for action, succ in env.succ(curr).items():
-                if succ[0] is not None:
-                    ((position, _, _), cost, _) = succ
-                    state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
+            close.append(curr)
 
-                    new_g = gvalues[curr] + cost
-                    new_f = self.f(env, state, new_g, h_weight)
+            if(terminated[curr]):
+                continue
 
-                    if (state not in close) and (state not in open.keys()):
+            for action, ((position, _, _), cost, ter) in env.succ(curr).items():
+                state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
+
+                new_g = gvalues[curr] + cost
+                new_f = self.f(env, state, new_g, h_weight)
+
+                if (state not in close) and (state not in open.keys()):
+                    fathers[state] = (curr, action)
+                    gvalues[state] = new_g
+                    fvalues[state] = new_f
+                    terminated[state] = ter
+                    open[state] = fvalues[state]
+
+                elif state in open.keys():
+                    if new_f < fvalues[state]:
                         fathers[state] = (curr, action)
                         gvalues[state] = new_g
                         fvalues[state] = new_f
+                        terminated[state] = ter
+
+                else:
+                    if new_f < fvalues[state]:
+                        fathers[state] = (curr, action)
+                        gvalues[state] = new_g
+                        fvalues[state] = new_f
+                        terminated[state] = ter
+
                         open[state] = fvalues[state]
-
-                    elif state in open.keys():
-                        if new_f < fvalues[state]:
-                            fathers[state] = (curr, action)
-                            gvalues[state] = new_g
-                            fvalues[state] = new_f
-
-                    else:
-                        if new_f < fvalues[state]:
-                            fathers[state] = (curr, action)
-                            gvalues[state] = new_g
-                            fvalues[state] = new_f
-
-                            open[state] = fvalues[state]
-                            close.remove(state)
+                        close.remove(state)
 
         return [], -1, -1
 
@@ -161,9 +172,11 @@ class AStarEpsilonAgent():
 
             return np.abs(x1 - x2) + np.abs(y1 - y2)
 
-        min = h_manheten(s, env.d1)
+        min = np.inf
+        if (h_manheten(s, env.d1) < min and not s[1]):
+            min = h_manheten(s, env.d1)
 
-        if(h_manheten(s, env.d2) < min):
+        if(h_manheten(s, env.d2) < min and not s[2]):
             min = h_manheten(s, env.d2)
 
         for state in range (env.nrow * env.ncol):
@@ -211,15 +224,15 @@ class AStarEpsilonAgent():
         close = []
         fathers = {curr: (None, -1)}
         gvalues = {curr: 0}
+        terminated = {curr: False}
 
         fvalues = {}
         fvalues[curr] = self.f(env, curr, gvalues[curr], h_weight)
-        open[curr] = self.f(env, curr, gvalues[curr], h_weight)
+        open[curr] = (self.f(env, curr, gvalues[curr], h_weight), curr[0])
 
         while not len(open) == 0:
             curr = self.next(env, open, epsilon, gvalues)
             open.pop(curr)
-            close.append(curr)
 
             if env.is_final_state(curr):
                 # Calculate track to the solution
@@ -231,33 +244,39 @@ class AStarEpsilonAgent():
 
                 return actions, gvalues[curr], len(close)
 
-            for action, succ in env.succ(curr).items():
-                if succ[0] is not None:
-                    ((position, _, _), cost, _) = succ
-                    state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
+            close.append(curr)
 
-                    new_g = gvalues[curr] + cost
-                    new_f = self.f(env, state, new_g, h_weight)
+            if(terminated[curr]):
+                continue
 
-                    if (state not in close) and (state not in open.keys()):
+            for action, ((position, _, _), cost, ter) in env.succ(curr).items():
+                state = (position, curr[1] or (position == env.d1[0]), curr[2] or (position == env.d2[0]))
+
+                new_g = gvalues[curr] + cost
+                new_f = self.f(env, state, new_g, h_weight)
+
+                if (state not in close) and (state not in open.keys()):
+                    fathers[state] = (curr, action)
+                    gvalues[state] = new_g
+                    fvalues[state] = new_f
+                    terminated[state] = ter
+                    open[state] = fvalues[state]
+
+                elif state in open.keys():
+                    if new_f < fvalues[state]:
                         fathers[state] = (curr, action)
                         gvalues[state] = new_g
                         fvalues[state] = new_f
+                        terminated[state] = ter
+
+                else:
+                    if new_f < fvalues[state]:
+                        fathers[state] = (curr, action)
+                        gvalues[state] = new_g
+                        fvalues[state] = new_f
+                        terminated[state] = ter
+
                         open[state] = fvalues[state]
-
-                    elif state in open.keys():
-                        if new_f < fvalues[state]:
-                            fathers[state] = (curr, action)
-                            gvalues[state] = new_g
-                            fvalues[state] = new_f
-
-                    else:
-                        if new_f < fvalues[state]:
-                            fathers[state] = (curr, action)
-                            gvalues[state] = new_g
-                            fvalues[state] = new_f
-
-                            open[state] = fvalues[state]
-                            close.remove(state)
+                        close.remove(state)
 
         return [], -1, -1

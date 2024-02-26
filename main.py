@@ -83,7 +83,8 @@ print(f"Expanded: {expanded}")
 print(f"Actions: {actions}")
 print("\n");
 
-#print_solution(actions, env)
+"""
+print_solution(actions, env)
 
 import csv
 
@@ -171,3 +172,4 @@ with open("results.csv", 'w') as f:
     writer.writerow(data)
 
 
+"""
