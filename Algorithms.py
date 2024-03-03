@@ -140,7 +140,7 @@ class WeightedAStarAgent():
                     gvalues[state] = new_g
                     fvalues[state] = new_f
                     terminated[state] = ter
-                    open[state] = fvalues[state]
+                    open[state] = (fvalues[state], state[0])
 
                 elif state in open.keys():
                     if new_f < fvalues[state]:
@@ -156,7 +156,7 @@ class WeightedAStarAgent():
                         fvalues[state] = new_f
                         terminated[state] = ter
 
-                        open[state] = fvalues[state]
+                        open[state] = (fvalues[state], state[0])
                         close.remove(state)
 
         return [], -1, -1
@@ -191,9 +191,9 @@ class AStarEpsilonAgent():
 
 
     def next(self, env, open, epsilon, gvalues):
-        min_f = open.peekitem()[1]
+        min_f = open.peekitem()[1][0]
 
-        focal = [state for state in open.keys() if open[state] <= min_f * (1 + epsilon)]
+        focal = [state for state in open.keys() if open[state][0] <= min_f * (1.0 + epsilon)]
 
         """
         min_h = np.inf
@@ -207,7 +207,7 @@ class AStarEpsilonAgent():
         min_g = np.inf
         next_state = None
         for state in focal:
-            if gvalues[state] < min_g:
+            if gvalues[state] <= min_g:
                 min_g = gvalues[state]
                 next_state = state
 
@@ -260,7 +260,7 @@ class AStarEpsilonAgent():
                     gvalues[state] = new_g
                     fvalues[state] = new_f
                     terminated[state] = ter
-                    open[state] = fvalues[state]
+                    open[state] = (fvalues[state], state[0])
 
                 elif state in open.keys():
                     if new_f < fvalues[state]:
@@ -276,7 +276,7 @@ class AStarEpsilonAgent():
                         fvalues[state] = new_f
                         terminated[state] = ter
 
-                        open[state] = fvalues[state]
+                        open[state] = (fvalues[state], state[0])
                         close.remove(state)
 
         return [], -1, -1
