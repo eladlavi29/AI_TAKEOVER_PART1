@@ -9,16 +9,7 @@ MAPS = {
             "FDFF",
             "FFFD",
             "FFFG"],
-    "8x8": [
-        "SFFFFFFF",
-        "FFFFFTAL",
-        "TFFHFFTF",
-        "FFFFFHTF",
-        "FAFHFFFF",
-        "FHHFFFHF",
-        "DFTFHDTL",
-        "FLFHFFFG",
-    ],
+    "8x8": ['SAHTFHAHTHAFLTTHHHLF', 'HLAHFHALAHHHFLLGTATL', 'FATFGFDLFTAFHAFLTAAT', 'DFHTTTFHTFFHHFLFFAAH', 'LTTFLHLTTTHHHTTHFALF', 'TLLTTLTHHAAFALLFATAH', 'FLHLLHAAHLAATLAAALAH', 'FTLHLHLATLALFFHFALHT', 'ALHAALALHALHAFTTGLAT', 'HTHTTFAATLLATLFHHLTA'],
 }
 
 
@@ -50,6 +41,16 @@ def print_solution(actions, env: DragonBallEnv) -> None:
             break
 
 #Main Test
+sold = [(0, False, False), (1, False, False), (21, False, False), (41, False, False), (40, False, False), (61, False, False), (42, False, False), (43, False, False), (44, False, False), (22, False, False), (81, False, False), (80, False, False), (63, False, False), (64, False, False), (100, False, False), (84, False, False), (65, False, False), (45, False, False), (66, False, False), (101, False, False), (82, False, False), (104, False, False), (46, True, False), (86, False, False), (102, False, False), (121, False, False), (45, True, False), (44, True, False), (120, False, False), (83, False, False), (103, False, False), (104, False, False), (60, False, True), (40, False, True), (41, False, True), (42, False, True), (43, False, True), (44, False, True), (22, False, True), (63, False, True), (64, False, True), (61, False, True), (105, False, False), (106, False, False), (86, False, False), (87, False, False), (124, False, False), (21, False, True), (22, False, True), (84, False, True), (47, True, False), (26, True, False), (65, False, True), (126, False, False), (141, False, False), (45, False, True), (65, True, False), (64, True, False), (66, False, True), (123, False, False), (124, False, False), (140, False, False), (80, False, True), (81, False, True), (82, False, True), (83, False, True), (84, False, True), (64, False, True), (44, False, True), (63, False, True), (65, False, True), (45, False, True), (66, False, True), (104, False, True), (46, True, True), (86, False, True), (102, False, True), (103, False, True), (104, False, True), (84, False, True), (64, False, True), (44, False, True), (65, False, True), (45, False, True), (66, False, True), (46, True, True), (86, False, True), (45, True, True)]
+elad = [(0, False, False), (1, False, False), (21, False, False), (41, False, False), (40, False, False), (61, False, False), (42, False, False), (43, False, False), (44, False, False), (22, False, False), (81, False, False), (80, False, False), (63, False, False), (64, False, False), (100, False, False), (84, False, False), (65, False, False), (45, False, False), (66, False, False), (101, False, False), (82, False, False), (46, True, False), (102, False, False), (121, False, False), (45, True, False), (44, True, False), (120, False, False), (83, False, False), (103, False, False), (104, False, False), (60, False, True), (40, False, True), (41, False, True), (42, False, True), (43, False, True), (61, False, True), (105, False, False), (106, False, False), (86, False, False), (87, False, False), (21, False, True), (22, False, True), (47, True, False), (26, True, False), (126, False, False), (141, False, False), (65, True, False), (64, True, False), (123, False, False), (124, False, False), (140, False, False), (80, False, True), (81, False, True), (82, False, True), (83, False, True), (63, False, True), (102, False, True), (103, False, True), (104, False, True), (84, False, True), (64, False, True), (44, False, True), (65, False, True), (45, False, True), (66, False, True), (46, True, True), (86, False, True), (45, True, True)]
+
+temp = []
+for i in elad:
+    if i not in sold:
+        temp.append(i)
+
+print(temp)
+
 env = DragonBallEnv(MAPS["8x8"])
 
 env.reset()
@@ -62,13 +63,11 @@ print(f"Expanded: {expanded}")
 print(f"Actions: {actions}")
 print("\n");
 
-assert total_cost == 119.0, "Error in total cost returned"
-
 #print_solution(actions, env)
 
 WA_agent = WeightedAStarAgent()
 
-actions, total_cost, expanded = WA_agent.search(env, h_weight=0.5)
+actions, total_cost, expanded = WA_agent.search(env, h_weight=0.9)
 print(f"wA*:")
 print(f"Total_cost: {total_cost}")
 print(f"Expanded: {expanded}")
@@ -76,7 +75,7 @@ print(f"Actions: {actions}")
 print("\n");
 
 AStarEpsilon_agent = AStarEpsilonAgent()
-actions, total_cost, expanded = AStarEpsilon_agent.search(env, epsilon=1.0)
+actions, total_cost, expanded = AStarEpsilon_agent.search(env, epsilon=1)
 print(f"epsilon A*:")
 print(f"Total_cost: {total_cost}")
 print(f"Expanded: {expanded}")
@@ -145,94 +144,3 @@ if compare_csv(result, user_result):
     print(f'Congrats, You have passed!')
 else:
     print(f'Give it another try :)')
-
-"""
-print_solution(actions, env)
-
-import csv
-
-test_boards = {
-"map12x12":
-['SFAFTFFTHHHF',
-'AFLTFFFFTALF',
-'LHHLLHHLFTHD',
-'HALTHAHHADHF',
-'FFFTFHFFAHFL',
-'LLTHFFFAHFAT',
-'HAAFFALHTATF',
-'LLLFHFFHTLFH',
-'FATAFHTTFFAF',
-'HHFLHALLFTLF',
-'FFAFFTTAFAAL',
-'TAAFFFHAFHFG'],
-"map15x15":
-['SFTTFFHHHHLFATF',
-'ALHTLHFTLLFTHHF',
-'FTTFHHHAHHFAHTF',
-'LFHTFTALTAAFLLH',
-'FTFFAFLFFLFHTFF',
-'LTAFTHFLHTHHLLA',
-'TFFFAHHFFAHHHFF',
-'TTFFLFHAHFFTLFD',
-'TFHLHTFFHAAHFHF',
-'HHAATLHFFLFFHLH',
-'FLFHHAALLHLHHAT',
-'TLHFFLTHFTTFTTF',
-'AFLTDAFTLHFHFFF',
-'FFTFHFLTAFLHTLA',
-'HTFATLTFHLFHFAG'],
-"map20x20" :
-['SFFLHFHTALHLFATAHTHT',
-'HFTTLLAHFTAFAAHHTLFH',
-'HHTFFFHAFFFFAFFTHHHT',
-'TTAFHTFHTHHLAHHAALLF',
-'HLALHFFTHAHHAFFLFHTF',
-'AFTAFTFLFTTTFTLLTHDF',
-'LFHFFAAHFLHAHHFHFALA',
-'AFTFFLTFLFTAFFLTFAHH',
-'HTTLFTHLTFAFFLAFHFTF',
-'LLALFHFAHFAALHFTFHTF',
-'LFFFAAFLFFFFHFLFFAFH',
-'THHTTFAFLATFATFTHLLL',
-'HHHAFFFATLLALFAHTHLL',
-'HLFFFFHFFLAAFTFFDAFH',
-'HTLFTHFFLTHLHHLHFTFH',
-'AFTTLHLFFLHTFFAHLAFT',
-'HAATLHFFFHHHHAFFFHLH',
-'FHFLLLFHLFFLFTFFHAFL',
-'LHTFLTLTFATFAFAFHAAF',
-'FTFFFFFLFTHFTFLTLHFG']}
-
-test_envs = {}
-for board_name, board in test_boards.items():
-    test_envs[board_name] = DragonBallEnv(board)
-
-
-BFS_agent = BFSAgent()
-WAStar_agent = WeightedAStarAgent()
-
-weights = [0.5, 0.7, 0.9]
-
-agents_search_function = [
-    BFS_agent.search,
-]
-
-header = ['map',  "BFS-G cost",  "BFS-G expanded",\
-           'WA* (0.5) cost', 'WA* (0.5) expanded', 'WA* (0.7) cost', 'WA* (0.7) expanded', 'WA* (0.9) cost', 'WA* (0.9) expanded']
-
-with open("results.csv", 'w') as f:
-  writer = csv.writer(f)
-  writer.writerow(header)
-  for env_name, env in test_envs.items():
-    data = [env_name]
-    for agent in agents_search_function:
-      _, total_cost, expanded = agent(env)
-      data += [total_cost, expanded]
-    for w in weights:
-        _, total_cost, expanded = WAStar_agent.search(env, w)
-        data += [total_cost, expanded]
-
-    writer.writerow(data)
-
-
-"""

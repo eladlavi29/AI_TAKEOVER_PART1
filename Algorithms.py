@@ -5,26 +5,13 @@ from typing import List, Tuple
 import heapdict
 
 
-# class node():
-#     def __init__(self, state, father=None):
-#         self.state = state
-#         self.father = father
-#         self.children = []
-#
-#     def expand(self, env):
-#         print(env.succ(self.state).values())
-#         for (state, cost, terminated) in env.succ(self.state).values():
-#             if (cost != np.inf):
-#                 self.children.append((state, cost, terminated))
-
-
 class BFSAgent():
 
     def __init__(self) -> None:
         pass
 
     def search(self, env: DragonBallEnv) -> Tuple[List[int], float, int]:
-        curr = env.get_state()
+        curr = env.get_initial_state()
 
         if env.is_final_state(curr):
             return [], 0, 0
@@ -40,7 +27,7 @@ class BFSAgent():
             open = open[1:]
             close.append(curr)
 
-            if(terminated[curr]):
+            if (terminated[curr]):
                 continue
 
             for action, ((position, _, _), cost, ter) in env.succ(curr).items():
@@ -48,7 +35,7 @@ class BFSAgent():
 
                 if (state not in close) and (state not in open):
                     if env.is_final_state(state):
-                        #Calculate track to the solution
+                        # Calculate track to the solution
                         actions = [action]
                         iterator = curr
                         while fathers[iterator][1] != -1:
@@ -62,8 +49,7 @@ class BFSAgent():
                     fathers[state] = (curr, action)
                     costs[state] = costs[curr] + cost
 
-
-        return [], -1, -1
+        return [], 0, 0
 
 
 class WeightedAStarAgent():
@@ -82,10 +68,9 @@ class WeightedAStarAgent():
         if (h_manheten(s, env.d2) < min and not s[2]):
             min = h_manheten(s, env.d2)
 
-        for state in range (env.nrow * env.ncol):
-            if env.is_final_state((state, True, True)):
-                if (h_manheten(s, (state, True, True)) < min):
-                    min = h_manheten(s, (state, True, True))
+        for state in env.get_goal_states():
+            if (h_manheten(s, state) < min):
+                min = h_manheten(s, state)
 
         return min
 
@@ -96,7 +81,7 @@ class WeightedAStarAgent():
         pass
 
     def search(self, env: DragonBallEnv, h_weight) -> Tuple[List[int], float, int]:
-        curr = env.get_state()
+        curr = env.get_initial_state()
 
         if env.is_final_state(curr):
             return [], 0, 0
@@ -106,6 +91,7 @@ class WeightedAStarAgent():
         fathers = {curr: (None, -1)}
         gvalues = {curr: 0}
         terminated = {curr: False}
+        expanded = 0
 
         fvalues = {}
         fvalues[curr] = self.f(env, curr, gvalues[curr], h_weight)
@@ -122,11 +108,12 @@ class WeightedAStarAgent():
                     actions = [fathers[iterator][1]] + actions
                     iterator = fathers[iterator][0]
 
-                return actions, gvalues[curr], len(close)
+                return actions, gvalues[curr], expanded
 
+            expanded += 1
             close.append(curr)
 
-            if(terminated[curr]):
+            if terminated[curr]:
                 continue
 
             for action, ((position, _, _), cost, ter) in env.succ(curr).items():
@@ -135,19 +122,21 @@ class WeightedAStarAgent():
                 new_g = gvalues[curr] + cost
                 new_f = self.f(env, state, new_g, h_weight)
 
-                if (state not in close) and (state not in open.keys()):
+                if (state not in close) and (state not in open):
                     fathers[state] = (curr, action)
                     gvalues[state] = new_g
                     fvalues[state] = new_f
                     terminated[state] = ter
-                    open[state] = (fvalues[state], state[0])
+                    open[state] = (new_f, state[0])
 
-                elif state in open.keys():
+                elif state in open:
                     if new_f < fvalues[state]:
                         fathers[state] = (curr, action)
                         gvalues[state] = new_g
                         fvalues[state] = new_f
                         terminated[state] = ter
+
+                        open[state] = (new_f, state[0])
 
                 else:
                     if new_f < fvalues[state]:
@@ -156,10 +145,11 @@ class WeightedAStarAgent():
                         fvalues[state] = new_f
                         terminated[state] = ter
 
-                        open[state] = (fvalues[state], state[0])
+                        open[state] = (new_f, state[0])
                         close.remove(state)
 
-        return [], -1, -1
+        return [], 0, 0
+
 
 class AStarEpsilonAgent():
     def __init__(self) -> None:
@@ -176,10 +166,10 @@ class AStarEpsilonAgent():
         if (h_manheten(s, env.d1) < min and not s[1]):
             min = h_manheten(s, env.d1)
 
-        if(h_manheten(s, env.d2) < min and not s[2]):
+        if (h_manheten(s, env.d2) < min and not s[2]):
             min = h_manheten(s, env.d2)
 
-        for state in range (env.nrow * env.ncol):
+        for state in range(env.nrow * env.ncol):
             if env.is_final_state((state, True, True)):
                 if (h_manheten(s, (state, True, True)) < min):
                     min = h_manheten(s, (state, True, True))
@@ -189,32 +179,17 @@ class AStarEpsilonAgent():
     def f(self, env, state, g, w):
         return (1 - w) * g + w * self.h_msap(env, state)
 
-
     def next(self, env, open, epsilon, gvalues):
+        focal = heapdict.heapdict()
         min_f = open.peekitem()[1][0]
+        for state in open.keys():
+            if open[state][0] <= min_f * (1.0 + epsilon):
+                focal[state] = (gvalues[state], state[0])
 
-        focal = [state for state in open.keys() if open[state][0] <= min_f * (1.0 + epsilon)]
-
-        """
-        min_h = np.inf
-        next_state = None
-        for state in focal:
-            if self.h_msap(env, state) < min_h:
-                min_h = self.h_msap(env, state)
-                next_state = state
-
-        """
-        min_g = np.inf
-        next_state = None
-        for state in focal:
-            if gvalues[state] <= min_g:
-                min_g = gvalues[state]
-                next_state = state
-
-        return next_state
+        return focal.popitem()[0]
 
     def search(self, env: DragonBallEnv, epsilon: int) -> Tuple[List[int], float, int]:
-        curr = env.get_state()
+        curr = env.get_initial_state()
 
         if env.is_final_state(curr):
             return [], 0, 0
@@ -225,6 +200,8 @@ class AStarEpsilonAgent():
         fathers = {curr: (None, -1)}
         gvalues = {curr: 0}
         terminated = {curr: False}
+
+        expanded = 0
 
         fvalues = {}
         fvalues[curr] = self.f(env, curr, gvalues[curr], h_weight)
@@ -242,11 +219,12 @@ class AStarEpsilonAgent():
                     actions = [fathers[iterator][1]] + actions
                     iterator = fathers[iterator][0]
 
-                return actions, gvalues[curr], len(close)
+                return actions, gvalues[curr], expanded
 
+            expanded += 1
             close.append(curr)
 
-            if(terminated[curr]):
+            if (terminated[curr]):
                 continue
 
             for action, ((position, _, _), cost, ter) in env.succ(curr).items():
@@ -269,6 +247,8 @@ class AStarEpsilonAgent():
                         fvalues[state] = new_f
                         terminated[state] = ter
 
+                        open[state] = (new_f, state[0])
+
                 else:
                     if new_f < fvalues[state]:
                         fathers[state] = (curr, action)
@@ -279,4 +259,4 @@ class AStarEpsilonAgent():
                         open[state] = (fvalues[state], state[0])
                         close.remove(state)
 
-        return [], -1, -1
+        return [], 0, 0
